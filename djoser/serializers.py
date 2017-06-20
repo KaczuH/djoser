@@ -61,12 +61,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
     def perform_create(self, validated_data):
-        with transaction.atomic():
-            user = User.objects.create_user(**validated_data)
-            if settings.get('SEND_ACTIVATION_EMAIL'):
-                user.is_active = False
-                user.save(update_fields=['is_active'])
-        return user
+        if settings.get('SEND_ACTIVATION_EMAIL'):
+            validated_data.update({'is_active': False})
+        return User.objects.create_user(**validated_data)
 
 
 class LoginSerializer(serializers.Serializer):
